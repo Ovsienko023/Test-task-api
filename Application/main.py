@@ -9,7 +9,7 @@ def main():
 
 def conf_server():
     """ returns tuple(host, server) from the file: config.json """
-    path = os.getcwd() + "/config.json"
+    path = os.getcwd() + "/Application/config.json"
     with open(path) as config:
         json_str = config.read()
         json_str = json.loads(json_str)
