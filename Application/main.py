@@ -2,9 +2,9 @@ import os
 import json
 import tempfile
 from scripts.server.flask_server import app
+from scripts.logic.utilities import storage_path
 
-
-storage_path = os.path.join(tempfile.gettempdir(), 'storage.data')
+# storage_path = os.path.join(tempfile.gettempdir(), 'storage.data')
 
 
 def main():

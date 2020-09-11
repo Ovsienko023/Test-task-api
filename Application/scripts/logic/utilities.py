@@ -1,0 +1,1 @@
+storage_path = os.path.join(tempfile.gettempdir(), 'storage.data')
