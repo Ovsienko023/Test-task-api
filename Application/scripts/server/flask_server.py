@@ -7,13 +7,26 @@ app = Flask(__name__)
 @app.route('/api/v1/adding_new_user', methods=['POST'])
 def adding_new_user():
     """
-    {"name": "Bob", password: "123"}
+    {"name": "Bob"}
     """
     data = request.json
-    name = data['name']
-    password = data['password']
-    status = User.create(name, password)
+    try:
+        name = data['name']
+    except KeyError:
+        return {"Status": False, "info": "Invalid data."}
+    status = User.create(name)
     return status
+
+
+@app.route('/api/v1/get_user/<user_id>', methods=['GET'])
+def get_user(user_id):
+    try: 
+        user = User(user_id)
+        status = WrapperDB().get_user(user)
+        return status
+    except KeyError:
+        return {'Status': False, 'info': 'User with this id does not exist.'}
+
 
 
 @app.route('/api/v1/user/list', methods=['GET'])
@@ -22,6 +35,26 @@ def user_list():
     user_list = WrapperDB().get_all_users()
     return user_list
 
+
 @app.route('/api/v1/update/<user_id>', methods=['PUT'])
 def update_user(user_id):
-    return "{}"
+    """User update according to the specified parameters."""
+    try:
+        data = request.json
+        user = User(user_id)
+        user.update(data)
+        status = WrapperDB().update_user(user)
+        return status
+    except KeyError:
+        return {'Status': False, 'info': 'User with this id does not exist.'}
+
+
+@app.route('/api/v1/delete/<user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    """Removing a user by his id."""
+    try: 
+        user = User(user_id)
+        status = WrapperDB().delete_user(user)
+        return status
+    except KeyError:
+        return {'Status': False, 'info': 'User with this id does not exist.'}
