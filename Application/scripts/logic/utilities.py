@@ -63,7 +63,7 @@ class WrapperDB:
         """Generates a unique id for a new user."""
         numbers = string.digits
         unique_id = ''
-        for _ in range(5):
+        for _ in range(7):
             unique_id += random.choice(numbers)
 
         if self.data.get(unique_id):
