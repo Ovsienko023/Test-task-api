@@ -12,10 +12,11 @@ def adding_new_user():
     data = request.json
     try:
         name = data['name']
+        status = User.create(name)
+        return status
     except KeyError:
         return {"Status": False, "info": "Invalid data."}
-    status = User.create(name)
-    return status
+   
 
 
 @app.route('/api/v1/get_user/<user_id>', methods=['GET'])
