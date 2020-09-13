@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route('/api/v1/adding_new_user', methods=['POST'])
 def adding_new_user():
     """
-    {"name": "Bob"}
+    Adding a new user.
     """
     data = request.json
     try:
@@ -20,6 +20,7 @@ def adding_new_user():
 
 @app.route('/api/v1/get_user/<user_id>', methods=['GET'])
 def get_user(user_id):
+    """Give user by id."""
     try: 
         user = User(user_id)
         status = WrapperDB().get_user(user)
