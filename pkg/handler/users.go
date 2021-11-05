@@ -5,12 +5,11 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"net/http"
-	"strconv"
-	"time"
 
 	http_error "user_api/pkg/errors"
 	model "user_api/pkg/model"
 	repo "user_api/pkg/repository"
+	"user_api/pkg/service"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -27,34 +26,29 @@ func SearchUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	f, _ := ioutil.ReadFile(store)
-	s := repo.UserStore{}
-	_ = json.Unmarshal(f, &s)
-
 	request := model.CreateUserRequest{}
 
 	if err := render.Bind(r, &request); err != nil {
-		_ = render.Render(w, r, http_error.ErrInvalidRequest(err))
+		render.Status(r, http.StatusBadRequest)
+		render.JSON(w, r, &http.ErrAbortHandler)
 		return
 	}
 
-	s.Increment++
-	u := repo.User{
-		CreatedAt:   time.Now(),
-		DisplayName: request.DisplayName,
-		Email:       request.Email,
+	var message model.MessageCreatUser
+	message.DisplayName = request.DisplayName
+	message.Email = request.Email
+
+	var user service.Service = &service.UserService{}
+	result, err := user.CreateUser(message)
+
+	if err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, &http.ErrAbortHandler)
+		return
 	}
 
-	id := strconv.Itoa(s.Increment)
-	s.List[id] = u
-
-	b, _ := json.Marshal(&s)
-	_ = ioutil.WriteFile(store, b, fs.ModePerm)
-
 	render.Status(r, http.StatusCreated)
-	render.JSON(w, r, map[string]interface{}{
-		"user_id": id,
-	})
+	render.JSON(w, r, &result)
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {

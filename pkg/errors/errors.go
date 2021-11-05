@@ -33,3 +33,7 @@ func ErrInvalidRequest(err error) render.Renderer {
 		ErrorText:      err.Error(),
 	}
 }
+
+type ErrorServer interface {
+	Render(w http.ResponseWriter, r *http.Request) error
+}
