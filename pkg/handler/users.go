@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	http_error "refactoring/pkg/errors"
-	model "refactoring/pkg/model"
-	repo "refactoring/pkg/repository"
+	http_error "user_api/pkg/errors"
+	model "user_api/pkg/model"
+	repo "user_api/pkg/repository"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"

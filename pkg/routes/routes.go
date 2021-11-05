@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"refactoring/pkg/handler"
+	"user_api/pkg/handler"
 
 	"github.com/go-chi/chi/v5"
 )
