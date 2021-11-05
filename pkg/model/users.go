@@ -18,6 +18,20 @@ type UpdateUserRequest struct {
 
 func (c *UpdateUserRequest) Bind(r *http.Request) error { return nil }
 
+type MessageSearchUsers struct{}
+
+type MessageUser struct {
+	UserId      string    `json:"id"`
+	DisplayName string    `json:"display_name"`
+	Email       string    `json:"email"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+type MessageUsers struct {
+	Count int           `json:"count"`
+	Users []MessageUser `json:"users"`
+}
+
 type MessageCreatUser struct {
 	DisplayName string `json:"display_name"`
 	Email       string `json:"email"`

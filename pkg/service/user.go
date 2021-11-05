@@ -8,10 +8,32 @@ import (
 )
 
 type Service interface {
+	SearchUsers(msg model.MessageSearchUsers) (model.MessageUsers, error)
 	CreateUser(msg model.MessageCreatUser) (model.MessageCreatedUser, error)
 }
 
 type UserService struct {
+}
+
+func (u *UserService) SearchUsers(msg model.MessageSearchUsers) (model.MessageUsers, error) {
+	var user repo.Repository = &repo.UserRepository{}
+
+	data, err := user.SearchUsers(msg)
+	if err != nil {
+		return model.MessageUsers{}, err
+	}
+	message := model.MessageUsers{Count: data.Increment}
+
+	for id, user := range data.List {
+		item := model.MessageUser{
+			UserId:      id,
+			DisplayName: user.DisplayName,
+			Email:       user.Email,
+			CreatedAt:   user.CreatedAt,
+		}
+		message.Users = append(message.Users, item)
+	}
+	return message, nil
 }
 
 func (u *UserService) CreateUser(msg model.MessageCreatUser) (model.MessageCreatedUser, error) {
@@ -25,6 +47,10 @@ func (u *UserService) CreateUser(msg model.MessageCreatUser) (model.MessageCreat
 	data.CreatedAt = time.Now()
 	fmt.Println("User ", data.UserId, " created!")
 
-	// return message, errors.New("barnacles")
-	return data, nil
+	message := model.MessageCreatedUser{
+		UserId:    data.UserId,
+		CreatedAt: data.CreatedAt,
+	}
+
+	return message, nil
 }

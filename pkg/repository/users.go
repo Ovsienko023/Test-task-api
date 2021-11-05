@@ -20,30 +20,51 @@ type User struct {
 
 type UserList map[string]User
 
+type UserCreate struct {
+	UserId    string    `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type UserStore struct {
 	Increment int      `json:"increment"`
 	List      UserList `json:"list"`
 }
 
 type Repository interface {
-	CreateUser(model.MessageCreatUser) (model.MessageCreatedUser, error)
+	SearchUsers(msg model.MessageSearchUsers) (UserStore, error)
+	CreateUser(model.MessageCreatUser) (UserCreate, error)
 }
 
 type UserRepository struct {
 	UserStore
 }
 
-func (u *UserRepository) CreateUser(msg model.MessageCreatUser) (model.MessageCreatedUser, error) {
-	fmt.Println(msg.Email, msg.DisplayName)
+func (u *UserRepository) SearchUsers(msg model.MessageSearchUsers) (UserStore, error) {
+	fmt.Println(msg)
 
 	data, err := ioutil.ReadFile(store)
 	if err != nil {
-		return model.MessageCreatedUser{}, err
+		return UserStore{}, err
 	}
 
 	err = json.Unmarshal(data, &u.UserStore)
 	if err != nil {
-		return model.MessageCreatedUser{}, err
+		return UserStore{}, err
+	}
+
+	return u.UserStore, nil
+}
+
+func (u *UserRepository) CreateUser(msg model.MessageCreatUser) (UserCreate, error) {
+
+	data, err := ioutil.ReadFile(store)
+	if err != nil {
+		return UserCreate{}, err
+	}
+
+	err = json.Unmarshal(data, &u.UserStore)
+	if err != nil {
+		return UserCreate{}, err
 	}
 
 	u.UserStore.Increment++
@@ -58,14 +79,14 @@ func (u *UserRepository) CreateUser(msg model.MessageCreatUser) (model.MessageCr
 
 	encode, err := json.Marshal(&u.UserStore)
 	if err != nil {
-		return model.MessageCreatedUser{}, err
+		return UserCreate{}, err
 	}
 
 	err = ioutil.WriteFile(store, encode, fs.ModePerm)
 	if err != nil {
-		return model.MessageCreatedUser{}, err
+		return UserCreate{}, err
 	}
-	message := model.MessageCreatedUser{
+	message := UserCreate{
 		CreatedAt: raw.CreatedAt,
 		UserId:    id,
 	}

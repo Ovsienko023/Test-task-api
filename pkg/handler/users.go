@@ -18,11 +18,18 @@ import (
 const store = `users.json`
 
 func SearchUsers(w http.ResponseWriter, r *http.Request) {
-	f, _ := ioutil.ReadFile(store)
-	s := repo.UserStore{}
-	_ = json.Unmarshal(f, &s)
+	message := model.MessageSearchUsers{}
+	var user service.Service = &service.UserService{}
 
-	render.JSON(w, r, s.List)
+	result, err := user.SearchUsers(message)
+	if err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, &http.ErrAbortHandler)
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, result)
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
