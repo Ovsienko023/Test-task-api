@@ -59,13 +59,19 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	f, _ := ioutil.ReadFile(store)
-	s := repo.UserStore{}
-	_ = json.Unmarshal(f, &s)
+	message := model.MessageGetUser{
+		UserId: chi.URLParam(r, "user_id"),
+	}
 
-	id := chi.URLParam(r, "id")
+	var user service.Service = &service.UserService{}
+	result, err := user.GetUser(message)
+	if err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, &http.ErrAbortHandler)
+	}
 
-	render.JSON(w, r, s.List[id])
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, &result)
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {

@@ -8,6 +8,7 @@ import (
 )
 
 type Service interface {
+	GetUser(msg model.MessageGetUser) (model.MessageUser, error)
 	SearchUsers(msg model.MessageSearchUsers) (model.MessageUsers, error)
 	CreateUser(msg model.MessageCreatUser) (model.MessageCreatedUser, error)
 }
@@ -33,6 +34,23 @@ func (u *UserService) SearchUsers(msg model.MessageSearchUsers) (model.MessageUs
 		}
 		message.Users = append(message.Users, item)
 	}
+	return message, nil
+}
+
+func (u *UserService) GetUser(msg model.MessageGetUser) (model.MessageUser, error) {
+	var user repo.Repository = &repo.UserRepository{}
+
+	data, err := user.GetUser(msg)
+	if err != nil {
+		return model.MessageUser{}, err
+	}
+	message := model.MessageUser{
+		UserId:      msg.UserId,
+		DisplayName: data.DisplayName,
+		Email:       data.Email,
+		CreatedAt:   data.CreatedAt,
+	}
+
 	return message, nil
 }
 

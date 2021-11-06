@@ -31,6 +31,7 @@ type UserStore struct {
 }
 
 type Repository interface {
+	GetUser(msg model.MessageGetUser) (User, error)
 	SearchUsers(msg model.MessageSearchUsers) (UserStore, error)
 	CreateUser(model.MessageCreatUser) (UserCreate, error)
 }
@@ -53,6 +54,28 @@ func (u *UserRepository) SearchUsers(msg model.MessageSearchUsers) (UserStore, e
 	}
 
 	return u.UserStore, nil
+}
+
+func (u *UserRepository) GetUser(msg model.MessageGetUser) (User, error) {
+	data, err := ioutil.ReadFile(store)
+	if err != nil {
+		return User{}, nil
+	}
+	users := UserStore{}
+
+	err = json.Unmarshal(data, &users)
+	if err != nil {
+		return User{}, nil
+	}
+
+	user := users.List[msg.UserId]
+	message := User{
+		CreatedAt:   user.CreatedAt,
+		DisplayName: user.DisplayName,
+		Email:       user.Email,
+	}
+
+	return message, nil
 }
 
 func (u *UserRepository) CreateUser(msg model.MessageCreatUser) (UserCreate, error) {

@@ -20,6 +20,10 @@ func (c *UpdateUserRequest) Bind(r *http.Request) error { return nil }
 
 type MessageSearchUsers struct{}
 
+type MessageGetUser struct {
+	UserId string `json:"user_id"`
+}
+
 type MessageUser struct {
 	UserId      string    `json:"id"`
 	DisplayName string    `json:"display_name"`
