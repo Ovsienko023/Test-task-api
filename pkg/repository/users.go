@@ -2,7 +2,6 @@ package repo
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"strconv"
@@ -34,6 +33,7 @@ type Repository interface {
 	GetUser(msg model.MessageGetUser) (User, error)
 	SearchUsers(msg model.MessageSearchUsers) (UserStore, error)
 	CreateUser(model.MessageCreatUser) (UserCreate, error)
+	DeleteUser(model.MessageDeleteUser) error
 }
 
 type UserRepository struct {
@@ -41,8 +41,6 @@ type UserRepository struct {
 }
 
 func (u *UserRepository) SearchUsers(msg model.MessageSearchUsers) (UserStore, error) {
-	fmt.Println(msg)
-
 	data, err := ioutil.ReadFile(store)
 	if err != nil {
 		return UserStore{}, err
@@ -79,7 +77,6 @@ func (u *UserRepository) GetUser(msg model.MessageGetUser) (User, error) {
 }
 
 func (u *UserRepository) CreateUser(msg model.MessageCreatUser) (UserCreate, error) {
-
 	data, err := ioutil.ReadFile(store)
 	if err != nil {
 		return UserCreate{}, err
@@ -114,4 +111,31 @@ func (u *UserRepository) CreateUser(msg model.MessageCreatUser) (UserCreate, err
 		UserId:    id,
 	}
 	return message, nil
+}
+
+func (u *UserRepository) DeleteUser(msg model.MessageDeleteUser) error {
+	data, err := ioutil.ReadFile(store)
+	if err != nil {
+		return err
+	}
+	users := UserStore{}
+
+	err = json.Unmarshal(data, &users)
+	if err != nil {
+		return err
+	}
+
+	delete(users.List, msg.UserId)
+
+	encode, err := json.Marshal(&users)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(store, encode, fs.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

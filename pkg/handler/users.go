@@ -104,22 +104,17 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	f, _ := ioutil.ReadFile(store)
-	s := repo.UserStore{}
-	_ = json.Unmarshal(f, &s)
-
-	id := chi.URLParam(r, "id")
-
-	if _, ok := s.List[id]; !ok {
-		_ = render.Render(w, r, http_error.ErrInvalidRequest(http_error.UserNotFound))
-		render.Status(r, http.StatusNotFound)
-		return
+	message := model.MessageDeleteUser{
+		UserId: chi.URLParam(r, "user_id"),
 	}
 
-	delete(s.List, id)
-
-	b, _ := json.Marshal(&s)
-	_ = ioutil.WriteFile(store, b, fs.ModePerm)
+	var user service.Service = &service.UserService{}
+	err := user.DeleteUser(message)
+	if err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, &http.ErrAbortHandler)
+		return
+	}
 
 	render.Status(r, http.StatusNoContent)
 }

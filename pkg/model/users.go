@@ -45,3 +45,7 @@ type MessageCreatedUser struct {
 	UserId    string    `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type MessageDeleteUser struct {
+	UserId string `json:"user_id"`
+}

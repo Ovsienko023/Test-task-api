@@ -11,6 +11,7 @@ type Service interface {
 	GetUser(msg model.MessageGetUser) (model.MessageUser, error)
 	SearchUsers(msg model.MessageSearchUsers) (model.MessageUsers, error)
 	CreateUser(msg model.MessageCreatUser) (model.MessageCreatedUser, error)
+	DeleteUser(msg model.MessageDeleteUser) error
 }
 
 type UserService struct {
@@ -71,4 +72,16 @@ func (u *UserService) CreateUser(msg model.MessageCreatUser) (model.MessageCreat
 	}
 
 	return message, nil
+}
+
+func (u *UserService) DeleteUser(msg model.MessageDeleteUser) error {
+	var user repo.Repository = &repo.UserRepository{}
+	err := user.DeleteUser(msg)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("User ", msg.UserId, " deleted!")
+
+	return nil
 }
