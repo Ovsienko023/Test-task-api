@@ -1,14 +1,11 @@
 package handler
 
 import (
-	"encoding/json"
-	"io/fs"
-	"io/ioutil"
+	"fmt"
 	"net/http"
 
 	http_error "user_api/pkg/errors"
 	model "user_api/pkg/model"
-	repo "user_api/pkg/repository"
 	"user_api/pkg/service"
 
 	"github.com/go-chi/chi/v5"
@@ -33,17 +30,13 @@ func SearchUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	request := model.CreateUserRequest{}
+	message := model.MessageCreatUser{}
 
-	if err := render.Bind(r, &request); err != nil {
+	if err := render.Bind(r, &message); err != nil {
 		render.Status(r, http.StatusBadRequest)
 		render.JSON(w, r, &http.ErrAbortHandler)
 		return
 	}
-
-	var message model.MessageCreatUser
-	message.DisplayName = request.DisplayName
-	message.Email = request.Email
 
 	var user service.Service = &service.UserService{}
 	result, err := user.CreateUser(message)
@@ -75,30 +68,21 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	f, _ := ioutil.ReadFile(store)
-	s := repo.UserStore{}
-	_ = json.Unmarshal(f, &s)
+	message := model.MessageUpdateUser{}
 
-	request := model.UpdateUserRequest{}
-
-	if err := render.Bind(r, &request); err != nil {
+	if err := render.Bind(r, &message); err != nil {
 		_ = render.Render(w, r, http_error.ErrInvalidRequest(err))
 		return
 	}
+	message.UserId = chi.URLParam(r, "user_id")
 
-	id := chi.URLParam(r, "id")
-
-	if _, ok := s.List[id]; !ok {
-		_ = render.Render(w, r, http_error.ErrInvalidRequest(http_error.UserNotFound))
+	var user service.Service = &service.UserService{}
+	err := user.UpdateUser(message)
+	if err != nil {
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, &http.ErrAbortHandler)
 		return
 	}
-
-	u := s.List[id]
-	u.DisplayName = request.DisplayName
-	s.List[id] = u
-
-	b, _ := json.Marshal(&s)
-	_ = ioutil.WriteFile(store, b, fs.ModePerm)
 
 	render.Status(r, http.StatusNoContent)
 }
@@ -110,7 +94,9 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	var user service.Service = &service.UserService{}
 	err := user.DeleteUser(message)
+
 	if err != nil {
+		fmt.Println(err)
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, &http.ErrAbortHandler)
 		return

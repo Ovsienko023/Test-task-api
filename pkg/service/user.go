@@ -11,6 +11,7 @@ type Service interface {
 	GetUser(msg model.MessageGetUser) (model.MessageUser, error)
 	SearchUsers(msg model.MessageSearchUsers) (model.MessageUsers, error)
 	CreateUser(msg model.MessageCreatUser) (model.MessageCreatedUser, error)
+	UpdateUser(msg model.MessageUpdateUser) error
 	DeleteUser(msg model.MessageDeleteUser) error
 }
 
@@ -72,6 +73,18 @@ func (u *UserService) CreateUser(msg model.MessageCreatUser) (model.MessageCreat
 	}
 
 	return message, nil
+}
+
+func (u *UserService) UpdateUser(msg model.MessageUpdateUser) error {
+	var user repo.Repository = &repo.UserRepository{}
+
+	err := user.UpdateUser(msg)
+	if err != nil {
+		return err
+	}
+	fmt.Println("User ", msg.UserId, " updated!")
+
+	return nil
 }
 
 func (u *UserService) DeleteUser(msg model.MessageDeleteUser) error {

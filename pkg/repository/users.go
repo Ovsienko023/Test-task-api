@@ -32,8 +32,9 @@ type UserStore struct {
 type Repository interface {
 	GetUser(msg model.MessageGetUser) (User, error)
 	SearchUsers(msg model.MessageSearchUsers) (UserStore, error)
-	CreateUser(model.MessageCreatUser) (UserCreate, error)
-	DeleteUser(model.MessageDeleteUser) error
+	CreateUser(msg model.MessageCreatUser) (UserCreate, error)
+	UpdateUser(msg model.MessageUpdateUser) error
+	DeleteUser(msg model.MessageDeleteUser) error
 }
 
 type UserRepository struct {
@@ -113,6 +114,40 @@ func (u *UserRepository) CreateUser(msg model.MessageCreatUser) (UserCreate, err
 	return message, nil
 }
 
+func (u *UserRepository) UpdateUser(msg model.MessageUpdateUser) error {
+	data, err := ioutil.ReadFile(store)
+	if err != nil {
+		return err
+	}
+	userStore := UserStore{}
+
+	err = json.Unmarshal(data, &userStore)
+	if err != nil {
+		return err
+	}
+
+	user := userStore.List[msg.UserId]
+	if msg.DisplayName != "" {
+		user.DisplayName = msg.DisplayName
+	}
+	if msg.Email != "" {
+		user.Email = msg.Email
+	}
+	userStore.List[msg.UserId] = user
+
+	encode, err := json.Marshal(&userStore)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(store, encode, fs.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u *UserRepository) DeleteUser(msg model.MessageDeleteUser) error {
 	data, err := ioutil.ReadFile(store)
 	if err != nil {
@@ -124,6 +159,10 @@ func (u *UserRepository) DeleteUser(msg model.MessageDeleteUser) error {
 	if err != nil {
 		return err
 	}
+
+	// if _, ok := users.List[msg.UserId]; !ok {
+	// 	return errors.New("user_not_found")
+	// }
 
 	delete(users.List, msg.UserId)
 

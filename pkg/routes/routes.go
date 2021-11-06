@@ -14,7 +14,7 @@ func SetupRoutes(r *chi.Mux) {
 	r.Get("/users", handler.SearchUsers)
 	r.Post("/users", handler.CreateUser)
 	r.Get("/users/{user_id}", handler.GetUser)
-	r.Patch("/users/{id}", handler.UpdateUser)
+	r.Patch("/users/{user_id}", handler.UpdateUser)
 	r.Delete("/users/{user_id}", handler.DeleteUser)
 
 }
