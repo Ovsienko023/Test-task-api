@@ -4,14 +4,12 @@ import (
 	"net/http"
 
 	http_error "user_api/pkg/errors"
-	model "user_api/pkg/model"
+	"user_api/pkg/model"
 	"user_api/pkg/service"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
-
-const store = `users.json`
 
 func SearchUsers(w http.ResponseWriter, r *http.Request) {
 	message := model.MessageSearchUsers{}
