@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	http_error "user_api/pkg/errors"
@@ -58,6 +57,13 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 	var user service.Service = &service.UserService{}
 	result, err := user.GetUser(message)
+
+	if err == http_error.ErrUserNotFound {
+		render.Status(r, http.StatusNotFound)
+		render.JSON(w, r, &http.ErrAbortHandler)
+		return
+	}
+
 	if err != nil {
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, &http.ErrAbortHandler)
@@ -78,6 +84,13 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	var user service.Service = &service.UserService{}
 	err := user.UpdateUser(message)
+
+	if err == http_error.ErrUserNotFound {
+		render.Status(r, http.StatusNotFound)
+		render.JSON(w, r, &http.ErrAbortHandler)
+		return
+	}
+
 	if err != nil {
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, &http.ErrAbortHandler)
@@ -95,8 +108,13 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	var user service.Service = &service.UserService{}
 	err := user.DeleteUser(message)
 
+	if err == http_error.ErrUserNotFound {
+		render.Status(r, http.StatusNotFound)
+		render.JSON(w, r, &http.ErrAbortHandler)
+		return
+	}
+
 	if err != nil {
-		fmt.Println(err)
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, &http.ErrAbortHandler)
 		return

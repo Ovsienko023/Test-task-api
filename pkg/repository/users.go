@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"strconv"
 	"time"
+	http_error "user_api/pkg/errors"
 	"user_api/pkg/model"
 )
 
@@ -60,14 +61,18 @@ func (u *UserRepository) GetUser(msg model.MessageGetUser) (User, error) {
 	if err != nil {
 		return User{}, nil
 	}
-	users := UserStore{}
+	userStore := UserStore{}
 
-	err = json.Unmarshal(data, &users)
+	err = json.Unmarshal(data, &userStore)
 	if err != nil {
 		return User{}, nil
 	}
 
-	user := users.List[msg.UserId]
+	if _, ok := userStore.List[msg.UserId]; !ok {
+		return User{}, http_error.ErrUserNotFound
+	}
+
+	user := userStore.List[msg.UserId]
 	message := User{
 		CreatedAt:   user.CreatedAt,
 		DisplayName: user.DisplayName,
@@ -126,6 +131,10 @@ func (u *UserRepository) UpdateUser(msg model.MessageUpdateUser) error {
 		return err
 	}
 
+	if _, ok := userStore.List[msg.UserId]; !ok {
+		return http_error.ErrUserNotFound
+	}
+
 	user := userStore.List[msg.UserId]
 	if msg.DisplayName != "" {
 		user.DisplayName = msg.DisplayName
@@ -153,20 +162,20 @@ func (u *UserRepository) DeleteUser(msg model.MessageDeleteUser) error {
 	if err != nil {
 		return err
 	}
-	users := UserStore{}
+	userStore := UserStore{}
 
-	err = json.Unmarshal(data, &users)
+	err = json.Unmarshal(data, &userStore)
 	if err != nil {
 		return err
 	}
 
-	// if _, ok := users.List[msg.UserId]; !ok {
-	// 	return errors.New("user_not_found")
-	// }
+	if _, ok := userStore.List[msg.UserId]; !ok {
+		return http_error.ErrUserNotFound
+	}
 
-	delete(users.List, msg.UserId)
+	delete(userStore.List, msg.UserId)
 
-	encode, err := json.Marshal(&users)
+	encode, err := json.Marshal(&userStore)
 	if err != nil {
 		return err
 	}

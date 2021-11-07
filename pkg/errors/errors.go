@@ -7,9 +7,7 @@ import (
 	"github.com/go-chi/render"
 )
 
-var (
-	UserNotFound = errors.New("user_not_found")
-)
+var ErrUserNotFound = errors.New("user is not found")
 
 type ErrResponse struct {
 	Err            error `json:"-"`
